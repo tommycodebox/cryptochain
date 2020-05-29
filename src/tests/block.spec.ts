@@ -2,7 +2,7 @@ import { Block } from '@src/block'
 import { GENESIS_DATA } from '@src/config'
 
 describe('Block', () => {
-  const timestamp = new Date('2020-04-20')
+  const timestamp = new Date('2020-04-20').getTime()
   const lastHash = 'last-hash'
   const hash = 'hash'
   const data = ['1', '2']
@@ -30,6 +30,31 @@ describe('Block', () => {
 
     it('return the genesis data', () => {
       expect(genesisBlock).toEqual(GENESIS_DATA)
+    })
+  })
+
+  describe('mine()', () => {
+    const lastBlock = Block.genesis()
+    const data = 'mined data'
+    const minedBlock = Block.mine({
+      lastBlock,
+      data,
+    })
+
+    it('returns a Block instance', () => {
+      expect(minedBlock instanceof Block).toBe(true)
+    })
+
+    it('sets the `lastHash` to be the `hash` of the last block', () => {
+      expect(minedBlock.lastHash).toEqual(lastBlock.hash)
+    })
+
+    it('sets the `data`', () => {
+      expect(minedBlock.data).toEqual(data)
+    })
+
+    it('sets the `timestamp`', () => {
+      expect(minedBlock.timestamp).not.toEqual(undefined)
     })
   })
 })

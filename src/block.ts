@@ -1,12 +1,16 @@
 import { GENESIS_DATA } from './config'
 
 export interface BlockProps {
-  timestamp: Date
+  timestamp: number
   lastHash: string
   hash: string
   data: any[]
 }
 
+interface MineProps {
+  lastBlock: Block
+  data: any
+}
 export class Block {
   timestamp: BlockProps['timestamp']
   lastHash: BlockProps['lastHash']
@@ -22,5 +26,14 @@ export class Block {
 
   static genesis() {
     return new this(GENESIS_DATA)
+  }
+
+  static mine({ lastBlock, data }: MineProps) {
+    return new this({
+      timestamp: Date.now(),
+      lastHash: lastBlock.hash,
+      hash: '123',
+      data,
+    })
   }
 }
