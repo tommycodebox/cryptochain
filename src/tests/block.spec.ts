@@ -1,9 +1,9 @@
-import { Block } from '@src/block'
-import { GENESIS_DATA } from '@src/config'
-import { cryptoHash } from '@src/crypto-hash'
+import { Block } from '@/block'
+import { GENESIS_DATA, MINE_RATE } from '@/config'
+import { cryptoHash } from '@/crypto-hash'
 
 describe('Block', () => {
-  const timestamp = new Date('2020-04-20').getTime()
+  const timestamp = 2000
   const lastHash = 'last-hash'
   const hash = 'hash'
   const data = ['1', '2']
@@ -80,6 +80,39 @@ describe('Block', () => {
       expect(minedBlock.hash.substring(0, minedBlock.difficulty)).toEqual(
         '0'.repeat(minedBlock.difficulty),
       )
+    })
+
+    it('adjusts the difficulty', () => {
+      const possibleResults = [
+        lastBlock.difficulty + 1,
+        lastBlock.difficulty - 1,
+      ]
+      expect(possibleResults.includes(minedBlock.difficulty)).toBe(true)
+    })
+  })
+
+  describe('adjust()', () => {
+    it('raises the difficulty for a quickly mined block', () => {
+      expect(
+        Block.adjust({
+          original: block,
+          timestamp: block.timestamp + MINE_RATE - 100,
+        }),
+      ).toEqual(block.difficulty + 1)
+    })
+
+    it('lowers the difficulty for a slowly mined block', () => {
+      expect(
+        Block.adjust({
+          original: block,
+          timestamp: block.timestamp + MINE_RATE + 100,
+        }),
+      ).toEqual(block.difficulty - 1)
+    })
+
+    it('has a lower limit of 1', () => {
+      block.difficulty = -1
+      expect(Block.adjust({ original: block })).toEqual(1)
     })
   })
 })

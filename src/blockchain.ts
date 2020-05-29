@@ -1,5 +1,5 @@
-import { Block } from '@src/block'
-import { cryptoHash } from '@src/crypto-hash'
+import { Block } from '@/block'
+import { cryptoHash } from '@/crypto-hash'
 
 interface AddBlockProps {
   data: any[] | string

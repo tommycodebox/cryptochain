@@ -1,4 +1,4 @@
-import { GENESIS_DATA } from './config'
+import { GENESIS_DATA, MINE_RATE } from './config'
 import { cryptoHash } from './crypto-hash'
 
 export interface BlockProps {
@@ -13,6 +13,11 @@ export interface BlockProps {
 interface MineProps {
   lastBlock: Block
   data: any
+}
+
+interface AdjustProps {
+  original: Block
+  timestamp?: number
 }
 export class Block {
   timestamp: BlockProps['timestamp']
@@ -49,12 +54,13 @@ export class Block {
     let hash: string
     const lastHash = lastBlock.hash
 
-    const { difficulty } = lastBlock
+    let { difficulty } = lastBlock
     let nonce = 0
 
     do {
       nonce++
       timestamp = Date.now()
+      difficulty = Block.adjust({ original: lastBlock, timestamp })
       hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty)
     } while (hash.substring(0, difficulty) !== '0'.repeat(difficulty))
 
@@ -66,5 +72,15 @@ export class Block {
       nonce,
       difficulty,
     })
+  }
+
+  static adjust({ original, timestamp }: AdjustProps) {
+    const { difficulty } = original
+
+    if (difficulty < 1) return 1
+
+    if (timestamp - original.timestamp > MINE_RATE) return difficulty - 1
+
+    return difficulty + 1
   }
 }

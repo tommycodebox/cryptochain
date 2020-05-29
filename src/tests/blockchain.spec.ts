@@ -1,5 +1,5 @@
-import { Blockchain } from '@src/blockchain'
-import { Block } from '@src/block'
+import { Blockchain } from '@/blockchain'
+import { Block } from '@/block'
 
 describe('Blockchain', () => {
   let blockchain: Blockchain
