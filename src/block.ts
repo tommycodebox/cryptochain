@@ -5,7 +5,7 @@ export interface BlockProps {
   timestamp: number
   lastHash: string
   hash: string
-  data: any[]
+  data: any[] | string
 }
 
 interface MineProps {
