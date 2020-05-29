@@ -1,4 +1,5 @@
 import { GENESIS_DATA } from './config'
+import { cryptoHash } from './crypto-hash'
 
 export interface BlockProps {
   timestamp: number
@@ -29,10 +30,13 @@ export class Block {
   }
 
   static mine({ lastBlock, data }: MineProps) {
+    const timestamp = Date.now()
+    const lastHash = lastBlock.hash
+
     return new this({
-      timestamp: Date.now(),
-      lastHash: lastBlock.hash,
-      hash: '123',
+      timestamp,
+      lastHash,
+      hash: cryptoHash(timestamp, lastHash, data),
       data,
     })
   }
