@@ -9,6 +9,7 @@
     "outDir": "build",
     "baseUrl": ".",
     "paths": {
+      "@src/*": ["src/*"],
       "*": ["node_modules/*"]
     }
   },

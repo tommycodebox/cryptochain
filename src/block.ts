@@ -1,4 +1,4 @@
-interface BlockConstructor {
+interface BlockProps {
   timestamp: Date
   lastHash: string
   hash: string
@@ -6,24 +6,15 @@ interface BlockConstructor {
 }
 
 export class Block {
-  timestamp: BlockConstructor['timestamp']
-  lastHash: BlockConstructor['lastHash']
-  hash: BlockConstructor['hash']
-  data: BlockConstructor['data']
+  timestamp: BlockProps['timestamp']
+  lastHash: BlockProps['lastHash']
+  hash: BlockProps['hash']
+  data: BlockProps['data']
 
-  constructor({ timestamp, lastHash, hash, data }: BlockConstructor) {
+  constructor({ timestamp, lastHash, hash, data }: BlockProps) {
     this.timestamp = timestamp
     this.lastHash = lastHash
     this.hash = hash
     this.data = data
   }
 }
-
-const block = new Block({
-  timestamp: new Date(),
-  lastHash: '---',
-  hash: '...',
-  data: ['1', '2'],
-})
-
-export const run = () => console.log(block)
