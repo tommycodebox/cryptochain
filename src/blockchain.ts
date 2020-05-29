@@ -22,10 +22,17 @@ export class Blockchain {
   }
 
   replace(chain: Blockchain['chain']): void {
-    if (chain.length <= this.chain.length) return
+    if (chain.length <= this.chain.length) {
+      console.error('The incoming chain must be longer')
+      return
+    }
 
-    if (!Blockchain.isValid(chain)) return
+    if (!Blockchain.isValid(chain)) {
+      console.error('The incoming chain must be valid')
+      return
+    }
 
+    console.log('Replacing chain with ', chain)
     this.chain = chain
   }
 
