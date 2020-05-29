@@ -55,7 +55,6 @@ export class PubSub {
     const parsedMessage = JSON.parse(message)
 
     if (channel === CHANNELS.BLOCKCHAIN) {
-      console.log(this.blockchain)
       this.blockchain.replace(parsedMessage)
     }
   }

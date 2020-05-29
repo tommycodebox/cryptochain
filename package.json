@@ -9,6 +9,7 @@
   "scripts": {
     "test": "jest --watchAll",
     "dev": "webpack --watch",
+    "dev:peer": "cross-env GENERATE_PEER_PORT='true' node .",
     "start": "webpack"
   },
   "devDependencies": {
@@ -16,6 +17,7 @@
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.5",
     "@types/redis": "^2.8.22",
+    "cross-env": "^7.0.2",
     "jest": "^26.0.1",
     "nodemon-webpack-plugin": "^4.3.1",
     "ts-jest": "^26.0.0",
