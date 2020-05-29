@@ -1,5 +1,6 @@
 import { Blockchain } from '@/blockchain'
 import { Block } from '@/block'
+import { cryptoHash } from '@/crypto-hash'
 
 describe('Blockchain', () => {
   let blockchain: Blockchain
@@ -55,6 +56,32 @@ describe('Blockchain', () => {
       describe('and the chain contains a block with an invalid field', () => {
         it('return false', () => {
           blockchain.chain[2].data = 'fake-data'
+
+          expect(Blockchain.isValid(blockchain.chain)).toBe(false)
+        })
+      })
+
+      describe('and the chain contains a block with a jumped difficulty', () => {
+        it('return false', () => {
+          const lastBlock = blockchain.chain[blockchain.chain.length - 1]
+          const lastHash = lastBlock.hash
+          const timestamp = Date.now()
+          const nonce = 0
+          const data: any[] = []
+          const difficulty = lastBlock.difficulty - 3
+
+          const hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty)
+
+          const badBlock = new Block({
+            timestamp,
+            lastHash,
+            hash,
+            data,
+            nonce,
+            difficulty,
+          })
+
+          blockchain.chain.push(badBlock)
 
           expect(Blockchain.isValid(blockchain.chain)).toBe(false)
         })

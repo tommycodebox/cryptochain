@@ -1,5 +1,7 @@
+import hexToBinary from 'hex-to-binary'
+
+import { cryptoHash } from '@/crypto-hash'
 import { GENESIS_DATA, MINE_RATE } from './config'
-import { cryptoHash } from './crypto-hash'
 
 export interface BlockProps {
   timestamp: number
@@ -62,7 +64,9 @@ export class Block {
       timestamp = Date.now()
       difficulty = Block.adjust({ original: lastBlock, timestamp })
       hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty)
-    } while (hash.substring(0, difficulty) !== '0'.repeat(difficulty))
+    } while (
+      hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty)
+    )
 
     return new this({
       timestamp,
