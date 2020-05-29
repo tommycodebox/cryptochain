@@ -3,9 +3,14 @@ import { Block } from '@src/block'
 
 describe('Blockchain', () => {
   let blockchain: Blockchain
+  let newChain: Blockchain
+  let originalChain: Blockchain['chain']
 
   beforeEach(() => {
     blockchain = new Blockchain()
+    newChain = new Blockchain()
+
+    originalChain = blockchain.chain
   })
 
   it('contains a `chain` Array instance', () => {
@@ -58,6 +63,43 @@ describe('Blockchain', () => {
       describe('and the chain does not contain any invalid blocks', () => {
         it('return true', () => {
           expect(Blockchain.isValid(blockchain.chain)).toBe(true)
+        })
+      })
+    })
+  })
+
+  describe('replace()', () => {
+    describe('when the new chain is not longer', () => {
+      it('does not replace the chain', () => {
+        newChain.chain[0] = { new: 'chain' } as any
+
+        blockchain.replace(newChain.chain)
+
+        expect(blockchain.chain).toEqual(originalChain)
+      })
+    })
+
+    describe('when the new chain is longer', () => {
+      beforeEach(() => {
+        newChain.addBlock({ data: 'foo' })
+        newChain.addBlock({ data: 'bar' })
+        newChain.addBlock({ data: 'top' })
+      })
+
+      describe('and the chain is invalid', () => {
+        it('does not replace the chain', () => {
+          newChain.chain[2].hash = 'fake-hash'
+
+          blockchain.replace(newChain.chain)
+
+          expect(blockchain.chain).toEqual(originalChain)
+        })
+      })
+      describe('and the chain is valid', () => {
+        it('replaces the chain', () => {
+          blockchain.replace(newChain.chain)
+
+          expect(blockchain.chain).toEqual(newChain.chain)
         })
       })
     })
