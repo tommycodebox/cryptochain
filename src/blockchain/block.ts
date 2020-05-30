@@ -1,7 +1,7 @@
 import hexToBinary from 'hex-to-binary'
 
-import { cryptoHash } from '@/crypto-hash'
-import { GENESIS_DATA, MINE_RATE } from './config'
+import { cryptoHash } from '@/utils/crypto-hash'
+import { GENESIS_DATA, MINE_RATE } from '../config'
 
 export interface BlockProps {
   timestamp: number

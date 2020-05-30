@@ -1,5 +1,7 @@
-import { Block } from '@/block'
-import { cryptoHash } from '@/crypto-hash'
+export * from './block'
+
+import { Block } from '@/blockchain'
+import { cryptoHash } from '@/utils/crypto-hash'
 
 interface AddBlockProps {
   data: any[] | string
@@ -32,7 +34,7 @@ export class Blockchain {
       return
     }
 
-    console.log('Replacing chain with ', chain)
+    console.log('Replacing chain with', chain)
     this.chain = chain
   }
 

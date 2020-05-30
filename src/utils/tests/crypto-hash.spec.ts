@@ -1,4 +1,4 @@
-import { cryptoHash } from '@/crypto-hash'
+import { cryptoHash } from '@/utils/crypto-hash'
 
 describe('cryptoHash()', () => {
   it('generates a SHA-256 hashed output', () => {

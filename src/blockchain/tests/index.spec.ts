@@ -1,6 +1,5 @@
-import { Blockchain } from '@/blockchain'
-import { Block } from '@/block'
-import { cryptoHash } from '@/crypto-hash'
+import { Blockchain, Block } from '@/blockchain'
+import { cryptoHash } from '@/utils/crypto-hash'
 
 describe('Blockchain', () => {
   let blockchain: Blockchain

@@ -39,7 +39,11 @@ export class PubSub {
   }
 
   publish({ channel, message }: PublishProps) {
-    this.publisher.publish(channel, message)
+    this.subscriber.unsubscribe(channel, () => {
+      this.publisher.publish(channel, message, () => {
+        this.subscriber.subscribe(channel)
+      })
+    })
   }
 
   broadcastChain() {
@@ -49,10 +53,12 @@ export class PubSub {
     })
   }
 
-  handleMessage(channel: string, message: any) {
-    console.log(`[ ${channel} ] Message received ->> ${message}`)
-
+  handleMessage(channel: string, message: string) {
     const parsedMessage = JSON.parse(message)
+    console.log(
+      `[ ${channel} ] Received chain with length ->> `,
+      parsedMessage.length,
+    )
 
     if (channel === CHANNELS.BLOCKCHAIN) {
       this.blockchain.replace(parsedMessage)
