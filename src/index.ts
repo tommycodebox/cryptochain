@@ -1,10 +1,14 @@
 import express, { Request, Response } from 'express'
+import request from 'request'
 import { Blockchain } from '@/blockchain'
 import { PubSub } from '@/pubsub'
 
 const app = express()
 const blockchain = new Blockchain()
 const pubsub = new PubSub({ blockchain })
+
+const DEFAULT_PORT = 4000
+const ROOT_NODE_ADDRESS = `http://localhost:${DEFAULT_PORT}`
 
 setTimeout(() => {
   pubsub.broadcastChain()
@@ -20,10 +24,22 @@ app.post('/api/mine', (req: Request, res: Response) => {
   const { data } = req.body
   blockchain.addBlock({ data })
 
+  pubsub.broadcastChain()
+
   res.redirect('/api/blocks')
 })
 
-const DEFAULT_PORT = 4000
+const syncChains = () => {
+  request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (err, res, body) => {
+    if (!err && res.statusCode === 200) {
+      const rootChain = JSON.parse(body)
+
+      console.log('Replace chain on sync with', rootChain)
+      blockchain.replace(rootChain)
+    }
+  })
+}
+
 let PEER_PORT
 
 if (process.env.GENERATE_PEER_PORT === 'true') {
@@ -31,4 +47,8 @@ if (process.env.GENERATE_PEER_PORT === 'true') {
 }
 
 const PORT = PEER_PORT || DEFAULT_PORT
-app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`)
+
+  syncChains()
+})
