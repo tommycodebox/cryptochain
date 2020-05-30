@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import request from 'request'
 import { Blockchain } from '@/blockchain'
-import { PubSub } from '@/pubsub'
+import { PubSub } from '@/utils'
 
 const app = express()
 const blockchain = new Blockchain()
