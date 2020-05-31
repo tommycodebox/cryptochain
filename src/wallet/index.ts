@@ -1,3 +1,5 @@
+export * from './transaction'
+
 import { STARTING_BALANCE } from '@/config'
 import { ec, cryptoHash } from '@/utils'
 

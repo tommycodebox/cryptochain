@@ -28,5 +28,15 @@ describe('Wallet', () => {
         }),
       ).toBe(true)
     })
+
+    it('does not verify an invalid signature', () => {
+      expect(
+        verifySignature({
+          publicKey: wallet.publicKey,
+          data,
+          signature: new Wallet().sign(data),
+        }),
+      ).toBe(false)
+    })
   })
 })
