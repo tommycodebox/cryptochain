@@ -1,16 +1,20 @@
 import { STARTING_BALANCE } from '@/config'
-import { ec } from '@/utils'
-import { curve } from 'elliptic'
+import { ec, cryptoHash } from '@/utils'
 
 export class Wallet {
   balance: number
   publicKey: string
+  keyPair = ec.genKeyPair()
 
   constructor() {
     this.balance = STARTING_BALANCE
 
-    const keyPair = ec.genKeyPair()
+    this.keyPair = ec.genKeyPair()
 
-    this.publicKey = keyPair.getPublic().encode('hex', false)
+    this.publicKey = this.keyPair.getPublic().encode('hex', false)
+  }
+
+  sign(data: any) {
+    return this.keyPair.sign(cryptoHash(data))
   }
 }
