@@ -10,7 +10,7 @@ type VerifySignature = (props: {
   publicKey: string
   data: any
   signature: EC.Signature
-}) => void
+}) => boolean
 
 export const verifySignature: VerifySignature = ({
   publicKey,

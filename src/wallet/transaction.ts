@@ -1,5 +1,6 @@
 import { Wallet } from '@/wallet'
 import { v1 as uuid } from 'uuid'
+import { verifySignature } from '@/utils'
 
 interface TransactionProps {
   senderWallet: Wallet
@@ -9,7 +10,9 @@ interface TransactionProps {
 
 export class Transaction {
   id: string
-  outputMap: any
+  outputMap: {
+    [publicKey: string]: number
+  }
 
   senderWallet: Wallet
   recipient: string
@@ -49,5 +52,27 @@ export class Transaction {
       address: senderWallet.publicKey,
       signature: senderWallet.sign(outputMap),
     }
+  }
+
+  static isValid(transaction: Transaction) {
+    const {
+      input: { address, amount, signature },
+      outputMap,
+    } = transaction
+
+    const outputTotal = Object.values(outputMap).reduce(
+      (total, outputAmount) => total + outputAmount,
+    )
+
+    if (amount !== outputTotal) {
+      console.error(`Invalid transaction from ${address}`)
+      return false
+    }
+
+    if (!verifySignature({ publicKey: address, data: outputMap, signature })) {
+      console.error(`Invalid signature from ${address}`)
+      return false
+    }
+    return true
   }
 }
