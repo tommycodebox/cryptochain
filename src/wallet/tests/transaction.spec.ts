@@ -28,7 +28,7 @@ describe('Transaction', () => {
       expect(transaction.outputMap[recipient]).toEqual(amount)
     })
 
-    it('outputs the remaining balance for the `senderWaller`', () => {
+    it('outputs the remaining balance for the `senderWallet`', () => {
       expect(transaction.outputMap[senderWallet.publicKey]).toEqual(
         senderWallet.balance - amount,
       )
@@ -43,7 +43,7 @@ describe('Transaction', () => {
       expect(transaction.input).toHaveProperty('timestamp')
     })
 
-    it('sets the `amount` to the `senderWaller` balance', () => {
+    it('sets the `amount` to the `senderWallet` balance', () => {
       expect(transaction.input.amount).toEqual(senderWallet.balance)
     })
 
@@ -95,6 +95,48 @@ describe('Transaction', () => {
           expect(errorMock).toHaveBeenCalled()
         })
       })
+    })
+  })
+
+  describe('update()', () => {
+    let originalSignature: string
+    let originalSenderOutput: number
+    let nextRecipient: string
+    let nextAmount: number
+
+    beforeEach(() => {
+      originalSignature = transaction.input.signature
+      originalSenderOutput = transaction.outputMap[senderWallet.publicKey]
+      nextRecipient = 'next-recipient'
+      nextAmount = 50
+
+      transaction.update({
+        senderWallet,
+        recipient: nextRecipient,
+        amount: nextAmount,
+      })
+    })
+
+    it('outputs the amount to the next recipient', () => {
+      expect(transaction.outputMap[nextRecipient]).toEqual(nextAmount)
+    })
+
+    it('subtracts the amount from the original sender output amount', () => {
+      expect(transaction.outputMap[senderWallet.publicKey]).toEqual(
+        originalSenderOutput - nextAmount,
+      )
+    })
+
+    it('maintains the total output value that matches the input amount', () => {
+      expect(
+        Object.values(transaction.outputMap).reduce(
+          (total, outputAmount) => total + outputAmount,
+        ),
+      ).toEqual(transaction.input.amount)
+    })
+
+    it('re-signs the transaction', () => {
+      expect(transaction.input.signature).not.toEqual(originalSignature)
     })
   })
 })
