@@ -13,6 +13,10 @@ export class Pool {
     this.transactionMap[transaction.id] = transaction
   }
 
+  setMap(transactionMap: Pool['transactionMap']) {
+    this.transactionMap = transactionMap
+  }
+
   existing({ inputAddress }: { inputAddress: string }): Transaction {
     const transactions = Object.values(this.transactionMap)
 

@@ -8,7 +8,7 @@ const app = express()
 const blockchain = new Blockchain()
 const pool = new Pool()
 const wallet = new Wallet()
-const pubsub = new PubSub({ blockchain })
+const pubsub = new PubSub({ blockchain, pool })
 
 const DEFAULT_PORT = 4000
 const ROOT_NODE_ADDRESS = `http://localhost:${DEFAULT_PORT}`
@@ -49,6 +49,8 @@ app.post('/api/transactions', (req: Request, res: Response) => {
 
   console.log('pool', pool)
 
+  pubsub.broadcastTransaction(transaction)
+
   res.json({ transaction })
 })
 
@@ -56,13 +58,22 @@ app.get('/api/pool', (req: Request, res: Response) => {
   res.json(pool.transactionMap)
 })
 
-const syncChains = () => {
+const syncWithRootState = () => {
   request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (err, res, body) => {
     if (!err && res.statusCode === 200) {
       const rootChain = JSON.parse(body)
 
       console.log('Replacing chain on sync')
       blockchain.replace(rootChain)
+    }
+  })
+
+  request({ url: `${ROOT_NODE_ADDRESS}/api/pool` }, (err, res, body) => {
+    if (!err && res.statusCode === 200) {
+      const rootPool = JSON.parse(body)
+
+      console.log('Replacing pool on sync')
+      pool.setMap(rootPool)
     }
   })
 }
@@ -78,6 +89,6 @@ app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)
 
   if (PORT !== DEFAULT_PORT) {
-    syncChains()
+    syncWithRootState()
   }
 })
