@@ -1,4 +1,5 @@
 export * from './transaction'
+export * from './pool'
 
 import { Transaction } from '@/wallet'
 import { STARTING_BALANCE } from '@/config'
