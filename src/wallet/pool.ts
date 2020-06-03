@@ -12,4 +12,10 @@ export class Pool {
   set(transaction: Transaction) {
     this.transactionMap[transaction.id] = transaction
   }
+
+  existing({ inputAddress }: { inputAddress: string }): Transaction {
+    const transactions = Object.values(this.transactionMap)
+
+    return transactions.find((t) => t.input.address === inputAddress)
+  }
 }
