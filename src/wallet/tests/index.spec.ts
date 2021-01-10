@@ -77,6 +77,26 @@ describe('Wallet', () => {
         expect(transaction.outputMap[recipient]).toEqual(amount)
       })
     })
+
+    describe('and a chain is passed', () => {
+      it('should call `Wallet.balance`', () => {
+        const balanceMock = jest.fn()
+
+        const originalBalance = Wallet.balance
+
+        Wallet.balance = balanceMock
+
+        wallet.createTransaction({
+          recipient: 'foo',
+          amount: 421,
+          chain: new Blockchain().chain,
+        })
+
+        expect(balanceMock).toHaveBeenCalled()
+
+        Wallet.balance = originalBalance
+      })
+    })
   })
 
   describe('balance()', () => {
@@ -125,6 +145,63 @@ describe('Wallet', () => {
             trx1.outputMap[wallet.publicKey] +
             trx2.outputMap[wallet.publicKey],
         )
+      })
+
+      describe('and the wallet has made a transaction', () => {
+        let recentTransaction: Transaction
+
+        beforeEach(() => {
+          recentTransaction = wallet.createTransaction({
+            recipient: 'foo',
+            amount: 421,
+          })
+
+          blockchain.addBlock({ data: [recentTransaction] })
+        })
+
+        it('should return the output aount of the recent transaction', () => {
+          expect(
+            Wallet.balance({
+              chain: blockchain.chain,
+              address: wallet.publicKey,
+            }),
+          ).toEqual(recentTransaction.outputMap[wallet.publicKey])
+        })
+
+        describe('and there are outputs next to and after the recent transaction', () => {
+          let sameBlockTrx: Transaction, nextBlockTrx: Transaction
+
+          beforeEach(() => {
+            recentTransaction = wallet.createTransaction({
+              recipient: 'later-og',
+              amount: 88,
+            })
+
+            sameBlockTrx = Transaction.rewardTransaction({
+              minerWallet: wallet,
+            })
+            blockchain.addBlock({ data: [recentTransaction, sameBlockTrx] })
+
+            nextBlockTrx = new Wallet().createTransaction({
+              recipient: wallet.publicKey,
+              amount: 421,
+            })
+            blockchain.addBlock({ data: [nextBlockTrx] })
+          })
+
+          it('should include the output amounts in the returned balance', () => {
+            expect(
+              Wallet.balance({
+                chain: blockchain.chain,
+                address: wallet.publicKey,
+              }),
+            ).toEqual(
+              recentTransaction.outputMap[wallet.publicKey] +
+                sameBlockTrx.outputMap[wallet.publicKey] +
+                nextBlockTrx.outputMap[wallet.publicKey],
+            )
+          })
+        })
       })
     })
   })

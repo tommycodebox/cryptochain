@@ -10,6 +10,7 @@ import { Blockchain } from '@/blockchain'
 interface CreateTransactionProps {
   recipient: string
   amount: number
+  chain?: Blockchain['chain']
 }
 
 export class Wallet {
@@ -32,7 +33,15 @@ export class Wallet {
   createTransaction({
     recipient,
     amount,
+    chain,
   }: CreateTransactionProps): Transaction {
+    if (chain) {
+      this.balance = Wallet.balance({
+        address: this.publicKey,
+        chain,
+      })
+    }
+
     if (amount > this.balance) {
       throw new Error('Amount exceeds balance')
     }
@@ -47,20 +56,27 @@ export class Wallet {
     chain: Blockchain['chain']
     address: string
   }) {
+    let hasConductedTransaction = false
     let total = 0
 
-    for (let i = 1; i < chain.length; i++) {
+    for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i]
 
       for (let transaction of block.data) {
+        if (transaction.input.address === address) {
+          hasConductedTransaction = true
+        }
+
         const addressOutput = transaction.outputMap[address]
 
         if (addressOutput) {
           total += addressOutput
         }
       }
+
+      if (hasConductedTransaction) break
     }
 
-    return STARTING_BALANCE + total
+    return hasConductedTransaction ? total : STARTING_BALANCE + total
   }
 }
