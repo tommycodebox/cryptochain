@@ -55,7 +55,7 @@ app.post('/api/transactions', (req: Request, res: Response) => {
 })
 
 app.get('/api/pool', (req: Request, res: Response) => {
-  res.json(pool.transactionMap)
+  res.json(pool.transactions)
 })
 
 const syncWithRootState = () => {

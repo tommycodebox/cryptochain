@@ -4,6 +4,7 @@ export * from './pool'
 import { Transaction } from '@/wallet'
 import { STARTING_BALANCE } from '@/config'
 import { ec, cryptoHash } from '@/utils'
+import { ec as EC } from 'elliptic'
 
 interface CreateTransactionProps {
   recipient: string
@@ -13,7 +14,7 @@ interface CreateTransactionProps {
 export class Wallet {
   balance: number
   publicKey: string
-  keyPair = ec.genKeyPair()
+  keyPair: EC.KeyPair
 
   constructor() {
     this.balance = STARTING_BALANCE

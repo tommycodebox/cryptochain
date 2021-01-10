@@ -1,25 +1,31 @@
 import { Transaction } from '@/wallet'
 
 export class Pool {
-  transactionMap: {
+  transactions: {
     [id: string]: Transaction
   }
 
   constructor() {
-    this.transactionMap = {}
+    this.transactions = {}
   }
 
   set(transaction: Transaction) {
-    this.transactionMap[transaction.id] = transaction
+    this.transactions[transaction.id] = transaction
   }
 
-  setMap(transactionMap: Pool['transactionMap']) {
-    this.transactionMap = transactionMap
+  setMap(transactions: Pool['transactions']) {
+    this.transactions = transactions
   }
 
   existing({ inputAddress }: { inputAddress: string }): Transaction {
-    const transactions = Object.values(this.transactionMap)
+    const transactions = Object.values(this.transactions)
 
     return transactions.find((t) => t.input.address === inputAddress)
+  }
+
+  validTransactions() {
+    return Object.values(this.transactions).filter((transaction) =>
+      Transaction.isValid(transaction),
+    )
   }
 }

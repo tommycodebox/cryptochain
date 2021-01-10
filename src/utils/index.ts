@@ -1,5 +1,6 @@
 export * from './crypto-hash'
 export * from './pubsub'
+export * from './miner'
 
 import { ec as EC } from 'elliptic'
 import { cryptoHash } from '@/utils'
