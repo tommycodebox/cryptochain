@@ -5,6 +5,7 @@ import { Transaction } from '@/wallet'
 import { STARTING_BALANCE } from '@/config'
 import { ec, cryptoHash } from '@/utils'
 import { ec as EC } from 'elliptic'
+import { Blockchain } from '@/blockchain'
 
 interface CreateTransactionProps {
   recipient: string
@@ -37,5 +38,29 @@ export class Wallet {
     }
 
     return new Transaction({ amount, recipient, senderWallet: this })
+  }
+
+  static balance({
+    chain,
+    address,
+  }: {
+    chain: Blockchain['chain']
+    address: string
+  }) {
+    let total = 0
+
+    for (let i = 1; i < chain.length; i++) {
+      const block = chain[i]
+
+      for (let transaction of block.data) {
+        const addressOutput = transaction.outputMap[address]
+
+        if (addressOutput) {
+          total += addressOutput
+        }
+      }
+    }
+
+    return STARTING_BALANCE + total
   }
 }
