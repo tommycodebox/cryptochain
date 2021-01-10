@@ -23,7 +23,7 @@ export class Blockchain {
     this.chain.push(newBlock)
   }
 
-  replace(chain: Blockchain['chain']): void {
+  replace(chain: Blockchain['chain'], onSuccess?: () => void): void {
     if (chain.length <= this.chain.length) {
       console.error('The incoming chain must be longer')
       return
@@ -34,6 +34,7 @@ export class Blockchain {
       return
     }
 
+    onSuccess?.()
     console.log('Replacing chain with', chain)
     this.chain = chain
   }
