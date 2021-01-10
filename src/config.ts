@@ -12,3 +12,8 @@ export const GENESIS_DATA: BlockProps = {
   nonce: 0,
   difficulty: INITIAL_DIFFICULTY,
 }
+
+export const REWARD_INPUT = {
+  address: '***authorized_reward***',
+}
+export const MINING_REWARD = 50

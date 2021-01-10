@@ -1,3 +1,4 @@
+import { Blockchain } from '@/blockchain'
 import { Wallet, Transaction, Pool } from '@/wallet'
 
 describe('TransactionPool', () => {
@@ -67,6 +68,38 @@ describe('TransactionPool', () => {
     it('should log errors for the invalid transactions', () => {
       pool.validTransactions()
       expect(errorMock).toHaveBeenCalled()
+    })
+  })
+
+  describe('clear()', () => {
+    it('should clear the transactions', () => {
+      pool.clear()
+      expect(pool.transactions).toEqual({})
+    })
+  })
+
+  describe('clearBlockchainTransactions()', () => {
+    it('should clear the pool of any existing blockchain transactions', () => {
+      const blockchain = new Blockchain()
+      const expectedTransactions: Record<string, Transaction> = {}
+
+      for (let i = 0; i < 6; i++) {
+        const transaction = new Wallet().createTransaction({
+          recipient: 'foo',
+          amount: 21,
+        })
+
+        pool.set(transaction)
+
+        if (i % 2 === 0) {
+          blockchain.addBlock({ data: [transaction] })
+        } else {
+          expectedTransactions[transaction.id] = transaction
+        }
+
+        pool.clearBlockchainTransactions({ chain: blockchain.chain })
+        expect(pool.transactions).toEqual(expectedTransactions)
+      }
     })
   })
 })

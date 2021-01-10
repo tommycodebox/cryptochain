@@ -1,3 +1,4 @@
+import { Blockchain } from '@/blockchain'
 import { Transaction } from '@/wallet'
 
 export class Pool {
@@ -6,6 +7,10 @@ export class Pool {
   }
 
   constructor() {
+    this.transactions = {}
+  }
+
+  clear() {
     this.transactions = {}
   }
 
@@ -27,5 +32,17 @@ export class Pool {
     return Object.values(this.transactions).filter((transaction) =>
       Transaction.isValid(transaction),
     )
+  }
+
+  clearBlockchainTransactions({ chain }: { chain: Blockchain['chain'] }) {
+    for (let i = 1; i < chain.length; i++) {
+      const block = chain[i]
+
+      for (let transaction of block.data) {
+        if (this.transactions[transaction.id]) {
+          delete this.transactions[transaction.id]
+        }
+      }
+    }
   }
 }

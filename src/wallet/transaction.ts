@@ -1,33 +1,52 @@
 import { Wallet } from '@/wallet'
 import { v1 as uuid } from 'uuid'
 import { verifySignature } from '@/utils'
+import { MINING_REWARD, REWARD_INPUT } from '@/config'
+
+interface Input {
+  timestamp: number
+  amount: number
+  address: string
+  signature: any
+}
+
+interface OutputMap {
+  [publicKey: string]: number
+}
 
 interface TransactionProps {
+  senderWallet?: Wallet
+  recipient?: string
+  amount?: number
+  outputMap?: OutputMap
+  input?: Input
+}
+
+interface CreateInputProps {
   senderWallet: Wallet
-  recipient: string
-  amount: number
+  outputMap: OutputMap
 }
 
 export class Transaction {
   id: string
-  outputMap: {
-    [publicKey: string]: number
-  }
-
+  outputMap: OutputMap
   senderWallet: Wallet
   recipient: string
   amount: number
-  input: {
-    timestamp: number
-    amount: number
-    address: string
-    signature: any
-  }
+  input: Input
 
-  constructor({ senderWallet, recipient, amount }: TransactionProps) {
+  constructor({
+    senderWallet,
+    recipient,
+    amount,
+    outputMap,
+    input,
+  }: TransactionProps) {
     this.id = uuid()
-    this.outputMap = this.createOutputMap({ senderWallet, recipient, amount })
-    this.input = this.createInput({ senderWallet, outputMap: this.outputMap })
+    this.outputMap =
+      outputMap || this.createOutputMap({ senderWallet, recipient, amount })
+    this.input =
+      input || this.createInput({ senderWallet, outputMap: this.outputMap })
   }
 
   createOutputMap({ senderWallet, recipient, amount }: TransactionProps) {
@@ -39,13 +58,7 @@ export class Transaction {
     return outputMap
   }
 
-  createInput({
-    senderWallet,
-    outputMap,
-  }: {
-    senderWallet: Wallet
-    outputMap: Transaction['outputMap']
-  }) {
+  createInput({ senderWallet, outputMap }: CreateInputProps) {
     return {
       timestamp: Date.now(),
       amount: senderWallet.balance,
@@ -75,6 +88,14 @@ export class Transaction {
     }
     return true
   }
+
+  static rewardTransaction({ minerWallet }: { minerWallet: Wallet }) {
+    return new this({
+      input: REWARD_INPUT,
+      outputMap: { [minerWallet.publicKey]: MINING_REWARD },
+    } as TransactionProps)
+  }
+
   update({ senderWallet, recipient, amount }: TransactionProps) {
     if (amount > this.outputMap[senderWallet.publicKey]) {
       throw new Error('Amount exceeds balance')
