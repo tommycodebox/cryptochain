@@ -1,7 +1,9 @@
 export * from './block'
 
 import { Block } from '@/blockchain'
+import { MINING_REWARD, REWARD_INPUT } from '@/config'
 import { cryptoHash } from '@/utils/crypto-hash'
+import { Transaction, Wallet } from '@/wallet'
 
 interface AddBlockProps {
   data: any[] | string
@@ -23,7 +25,11 @@ export class Blockchain {
     this.chain.push(newBlock)
   }
 
-  replace(chain: Blockchain['chain'], onSuccess?: () => void): void {
+  replace(
+    chain: Blockchain['chain'],
+    validateTransactions?: boolean,
+    onSuccess?: () => void,
+  ): void {
     if (chain.length <= this.chain.length) {
       console.error('The incoming chain must be longer')
       return
@@ -31,6 +37,11 @@ export class Blockchain {
 
     if (!Blockchain.isValid(chain)) {
       console.error('The incoming chain must be valid')
+      return
+    }
+
+    if (validateTransactions && !this.validTransactionData({ chain })) {
+      console.error('The incoming chain has invalid data')
       return
     }
 
@@ -62,6 +73,56 @@ export class Blockchain {
       if (hash !== validatedHash) return false
 
       if (Math.abs(lastDifficulty - difficulty) > 1) return false
+    }
+
+    return true
+  }
+
+  validTransactionData({ chain }: { chain: Block[] }) {
+    for (let i = 1; i < chain.length; i++) {
+      const block = chain[i]
+      const transactionSet = new Set()
+      let rewardTransactionCount = 0
+
+      for (let transaction of block.data) {
+        if (transaction.input.address === REWARD_INPUT.address) {
+          rewardTransactionCount += 1
+
+          if (rewardTransactionCount > 1) {
+            console.error('Miner rewards exceed limit')
+            return false
+          }
+
+          if (Object.values(transaction.outputMap)[0] !== MINING_REWARD) {
+            console.error('Miner reward amount is invalid')
+            return false
+          }
+        } else {
+          if (!Transaction.isValid(transaction)) {
+            console.error('Invalid transaction')
+            return false
+          }
+
+          const trueBalance = Wallet.balance({
+            chain: this.chain,
+            address: transaction.input.address,
+          })
+
+          if (transaction.input.amount !== trueBalance) {
+            console.error('Invalid input amount')
+            return false
+          }
+
+          if (transactionSet.has(transaction)) {
+            console.error(
+              'An identical transaction appears more than once in the block',
+            )
+            return false
+          } else {
+            transactionSet.add(transaction)
+          }
+        }
+      }
     }
 
     return true
